@@ -1277,13 +1277,14 @@ void ensure_frame_data() {
 }
 
 /**
-* Set the next frame of data to the given 8-bit RGB buffer after rotating the buffers.
+* Set the next frame of data to the given 8-bit RGBW buffer after rotating the buffers.
 */
 void set_next_frame_data(
 	uint8_t* frame_data,
 	uint32_t data_size,
 	uint8_t is_remote
 ) {
+    int x, y;
 	pthread_mutex_lock(&g_runtime_state.mutex);
 
 	rotate_frames(FALSE);
@@ -1292,7 +1293,20 @@ void set_next_frame_data(
 	data_size = min(data_size, g_runtime_state.frame_size * 4);
 
 	// Copy in new data
-	memcpy(g_runtime_state.next_frame_data, frame_data, data_size);
+	if (g_server_config.fcolor_enabled != 0) {
+      memcpy(g_runtime_state.next_frame_data, frame_data, data_size);
+    } else {
+      x = 0;
+      y = 0;
+      while (y < data_size) {
+        if (y%3 == 0) {
+          g_runtime_state.next_frame_data[y] = 0;
+        } else {
+          g_runtime_state.next_frame_data[y] = frame_data[x++];
+        }
+        y++;
+      }    
+    }
 
 	// Zero out any pixels not set by the new frame
 	memset((uint8_t*) g_runtime_state.next_frame_data + data_size, 0, (g_runtime_state.frame_size*4 - data_size));
