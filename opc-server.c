@@ -1284,7 +1284,7 @@ void set_next_frame_data(
 	uint32_t data_size,
 	uint8_t is_remote
 ) {
-    int x, y;
+    uint32_t x, y;
 	pthread_mutex_lock(&g_runtime_state.mutex);
 
 	rotate_frames(FALSE);
@@ -1299,10 +1299,10 @@ void set_next_frame_data(
       x = 0;
       y = 0;
       while (y < data_size) {
-        if (y%3 == 0) {
-          g_runtime_state.next_frame_data[y] = 0;
+        if (y%4 == 3) {
+          ((uint8_t*)(g_runtime_state.next_frame_data))[y] = 0;
         } else {
-          g_runtime_state.next_frame_data[y] = frame_data[x++];
+          ((uint8_t*)(g_runtime_state.next_frame_data))[y] = frame_data[x++];
         }
         y++;
       }    
